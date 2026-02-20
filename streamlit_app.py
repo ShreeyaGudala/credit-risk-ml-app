@@ -84,24 +84,27 @@ months = np.arange(1, 13)
 interest_rate = 0.12
 monthly_interest = (amt_credit * interest_rate) / 12
 
-# Repaid scenario (cumulative growth)
+# Repaid scenario
 repaid_curve = months * monthly_interest
 
-# Default scenario (loss occurs immediately)
+# Default scenario (flat loss)
 default_curve = np.full(12, -amt_credit)
 
-# Expected value curve
+# Expected scenario
 expected_curve = (1 - probability) * repaid_curve + probability * default_curve
 
-fig, ax = plt.subplots(figsize=(8, 5))
+fig, ax = plt.subplots(figsize=(8, 6))
 
-ax.plot(months, repaid_curve, label="If Repaid", linewidth=3)
-ax.plot(months, default_curve, label="If Default", linewidth=3)
-ax.plot(months, expected_curve, linestyle="--", linewidth=3, label="Expected Outcome")
+ax.plot(repaid_curve, months, linewidth=3, label="If Repaid")
+ax.plot(default_curve, months, linewidth=3, label="If Default")
+ax.plot(expected_curve, months, linestyle="--", linewidth=3, label="Expected Outcome")
 
-ax.set_xlabel("Months")
-ax.set_ylabel("Amount (₹)")
-ax.set_title("Loan Cashflow Projection")
+ax.set_ylabel("Months")
+ax.set_xlabel("Amount (₹)")
+ax.set_title("Loan Exposure Projection")
+
+ax.axvline(0, linestyle=":", linewidth=1.5)  # zero reference line
+
 ax.legend()
 
 st.pyplot(fig)
