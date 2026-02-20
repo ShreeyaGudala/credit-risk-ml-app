@@ -78,35 +78,30 @@ if st.button("Evaluate Credit Risk"):
     # -------------------------------
     # FINANCIAL IMPACT SIMULATION
     # -------------------------------
-    st.subheader("Financial Impact Analysis")
+    st.subheader("Financial Projection (12-Month Simulation)")
 
-    interest_rate = 0.12  # 12% assumed
+months = np.arange(1, 13)
+interest_rate = 0.12
+monthly_interest = (amt_credit * interest_rate) / 12
 
-    profit_if_repaid = amt_credit * interest_rate
-    loss_if_default = amt_credit
+# Repaid scenario (cumulative growth)
+repaid_curve = months * monthly_interest
 
-    expected_value = (1 - probability) * profit_if_repaid - probability * loss_if_default
+# Default scenario (loss occurs immediately)
+default_curve = np.full(12, -amt_credit)
 
-    scenarios = ["Repaid", "Default", "Expected Outcome"]
-    values = [profit_if_repaid, -loss_if_default, expected_value]
+# Expected value curve
+expected_curve = (1 - probability) * repaid_curve + probability * default_curve
 
-    fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(8, 5))
 
-    colors = ["green", "red", "blue"]
-    ax.bar(scenarios, values, color=colors)
+ax.plot(months, repaid_curve, label="If Repaid", linewidth=3)
+ax.plot(months, default_curve, label="If Default", linewidth=3)
+ax.plot(months, expected_curve, linestyle="--", linewidth=3, label="Expected Outcome")
 
-    ax.set_ylabel("Amount (₹)")
-    ax.set_title("Loan Financial Outcome Projection")
+ax.set_xlabel("Months")
+ax.set_ylabel("Amount (₹)")
+ax.set_title("Loan Cashflow Projection")
+ax.legend()
 
-    st.pyplot(fig)
-
-    st.caption("Expected Outcome represents risk-adjusted financial impact.")
-
-    st.divider()
-
-    # -------------------------------
-    # RISK SCORE DISPLAY
-    # -------------------------------
-    st.subheader("Risk Score")
-    risk_percent = int(probability * 100)
-    st.metric("Default Probability", f"{risk_percent}%")
+st.pyplot(fig)
