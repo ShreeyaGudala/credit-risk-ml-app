@@ -1,55 +1,49 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 
-# -----------------------------
-# Page Configuration
-# -----------------------------
+# -------------------------------
+# PAGE CONFIG
+# -------------------------------
 st.set_page_config(
     page_title="CrediShield - Credit Risk Engine",
-    layout="wide"
+    page_icon="🏦",
+    layout="centered"
 )
 
-# -----------------------------
-# Load Model
-# -----------------------------
-model = joblib.load("credit_model.pkl")
-
-# -----------------------------
-# Header Section
-# -----------------------------
-st.title("CrediShield — Enterprise Credit Risk Engine")
-
-st.markdown("""
-AI-driven credit default probability estimation system designed to support institutional lending decisions.
-""")
+st.title("🏦 CrediShield - Enterprise Credit Risk Engine")
+st.markdown("AI-powered credit risk evaluation & financial impact simulation.")
 
 st.divider()
 
-# -----------------------------
-# Input Section
-# -----------------------------
-st.header("Applicant Credit Profile")
+# -------------------------------
+# LOAD MODEL
+# -------------------------------
+@st.cache_resource
+def load_model():
+    return joblib.load("credit_model.pkl")
 
-col1, col2 = st.columns(2)
+model = load_model()
 
-with col1:
-    st.subheader("Financial Information")
-    amt_income = st.number_input("Annual Income", min_value=0.0, value=200000.0)
-    amt_credit = st.number_input("Loan Amount", min_value=0.0, value=500000.0)
-    amt_annuity = st.number_input("Loan Annuity", min_value=0.0, value=25000.0)
+# -------------------------------
+# USER INPUT SECTION
+# -------------------------------
+st.subheader("Applicant Financial Details")
 
-with col2:
-    st.subheader("Credit Risk Indicators")
-    ext_source_2 = st.number_input("External Score 2", min_value=0.0, max_value=1.0, value=0.5)
-    ext_source_3 = st.number_input("External Score 3", min_value=0.0, max_value=1.0, value=0.5)
+amt_income = st.number_input("Annual Income (₹)", min_value=0.0, value=300000.0)
+amt_credit = st.number_input("Loan Amount Requested (₹)", min_value=0.0, value=500000.0)
+amt_annuity = st.number_input("Loan Annuity (₹)", min_value=0.0, value=25000.0)
+ext_source_2 = st.number_input("External Risk Score 1", min_value=0.0, max_value=1.0, value=0.5)
+ext_source_3 = st.number_input("External Risk Score 2", min_value=0.0, max_value=1.0, value=0.5)
 
 st.divider()
 
-# -----------------------------
-# Prediction Section
-# -----------------------------
-if st.button("Evaluate Applicant"):
+# -------------------------------
+# PREDICTION
+# -------------------------------
+if st.button("Evaluate Credit Risk"):
 
     input_data = pd.DataFrame({
         "AMT_INCOME_TOTAL": [amt_income],
@@ -60,48 +54,59 @@ if st.button("Evaluate Applicant"):
     })
 
     probability = model.predict_proba(input_data)[0][1]
-    probability_percent = round(probability * 100, 2)
 
-    st.header("Risk Assessment Result")
-    st.markdown(f"### Estimated Default Probability: **{probability_percent}%**")
-
-    if probability < 0.4:
-        risk_level = "Low Risk"
-        action = "Recommended Action: Approve Application"
-    elif probability < 0.7:
-        risk_level = "Moderate Risk"
-        action = "Recommended Action: Manual Credit Review Required"
+    # -------------------------------
+    # RISK CLASSIFICATION
+    # -------------------------------
+    if probability < 0.3:
+        risk_label = "Low Risk"
+        recommendation = "Loan can be Approved"
+        st.success(f"Risk Classification: {risk_label}")
+    elif probability < 0.6:
+        risk_label = "Moderate Risk"
+        recommendation = "Manual Credit Review Required"
+        st.warning(f"Risk Classification: {risk_label}")
     else:
-        risk_level = "High Risk"
-        action = "Recommended Action: Decline Application"
+        risk_label = "High Risk"
+        recommendation = "Loan Rejection Recommended"
+        st.error(f"Risk Classification: {risk_label}")
 
-    st.markdown(f"**Risk Classification:** {risk_level}")
-    st.markdown(f"**{action}**")
-
-    st.subheader("Risk Probability")
-
-    progress_value = int(probability * 100)
-    st.progress(progress_value)
-
-    st.write(f"Risk Score: {progress_value}%")
+    st.subheader(f"Recommended Action: {recommendation}")
 
     st.divider()
 
-# -----------------------------
-# Model Transparency Section
-# -----------------------------
-st.header("Model Information & Transparency")
+    # -------------------------------
+    # FINANCIAL IMPACT SIMULATION
+    # -------------------------------
+    st.subheader("Financial Impact Analysis")
 
-st.markdown("""
-- **Model Type:** XGBoost Classifier  
-- **Training Dataset Size:** 246,000+ applicants  
-- **Performance Metric:** ROC-AUC ≈ 0.72  
-- **Imbalance Handling:** Applied during training  
-- **Deployment:** Streamlit Web Application  
+    interest_rate = 0.12  # 12% assumed
 
-**Disclaimer:**  
-This system provides probability-based risk estimates intended to assist lending professionals. Final credit decisions should incorporate institutional underwriting policies and human review.
-""")
+    profit_if_repaid = amt_credit * interest_rate
+    loss_if_default = amt_credit
 
+    expected_value = (1 - probability) * profit_if_repaid - probability * loss_if_default
 
+    scenarios = ["Repaid", "Default", "Expected Outcome"]
+    values = [profit_if_repaid, -loss_if_default, expected_value]
 
+    fig, ax = plt.subplots()
+
+    colors = ["green", "red", "blue"]
+    ax.bar(scenarios, values, color=colors)
+
+    ax.set_ylabel("Amount (₹)")
+    ax.set_title("Loan Financial Outcome Projection")
+
+    st.pyplot(fig)
+
+    st.caption("Expected Outcome represents risk-adjusted financial impact.")
+
+    st.divider()
+
+    # -------------------------------
+    # RISK SCORE DISPLAY
+    # -------------------------------
+    st.subheader("Risk Score")
+    risk_percent = int(probability * 100)
+    st.metric("Default Probability", f"{risk_percent}%")
