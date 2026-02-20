@@ -103,8 +103,9 @@ ax.set_ylabel("Months")
 ax.set_xlabel("Amount (₹)")
 ax.set_title("Loan Exposure Projection")
 
-ax.axvline(0, linestyle=":", linewidth=1.5)  # zero reference line
+ax.axvline(0, color="gray", linestyle="--", linewidth=1)  # zero reference line
 
 ax.legend()
 
 st.pyplot(fig)
+
