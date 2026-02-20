@@ -80,10 +80,10 @@ if st.button("Evaluate Applicant"):
 
     st.subheader("Risk Probability")
 
-progress_value = int(probability * 100)
-st.progress(progress_value)
+    progress_value = int(probability * 100)
+    st.progress(progress_value)
 
-st.write(f"Risk Score: {progress_value}%")
+    st.write(f"Risk Score: {progress_value}%")
 
     st.divider()
 
@@ -102,5 +102,6 @@ st.markdown("""
 **Disclaimer:**  
 This system provides probability-based risk estimates intended to assist lending professionals. Final credit decisions should incorporate institutional underwriting policies and human review.
 """)
+
 
 
