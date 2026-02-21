@@ -35,8 +35,21 @@ st.subheader("Applicant Financial Details")
 amt_income = st.number_input("Annual Income (₹)", min_value=0.0, value=300000.0)
 amt_credit = st.number_input("Loan Amount Requested (₹)", min_value=0.0, value=500000.0)
 amt_annuity = st.number_input("Loan Annuity (₹)", min_value=0.0, value=25000.0)
-ext_source_2 = st.number_input("External Risk Score 1", min_value=0.0, max_value=1.0, value=0.5)
-ext_source_3 = st.number_input("External Risk Score 2", min_value=0.0, max_value=1.0, value=0.5)
+repayment_reliability = st.number_input(
+    "Repayment Reliability Score",
+    min_value=0.0,
+    max_value=1.0,
+    value=0.5,
+    help="Indicates how consistently the applicant has repaid past loans. Higher is better."
+)
+
+credit_history_strength = st.number_input(
+    "Credit History Strength",
+    min_value=0.0,
+    max_value=1.0,
+    value=0.5,
+    help="Represents overall strength and depth of the applicant's credit history."
+)
 
 st.divider()
 
@@ -125,3 +138,4 @@ if st.session_state.probability is not None:
     ax.legend()
 
     st.pyplot(fig)
+
