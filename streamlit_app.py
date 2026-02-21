@@ -65,12 +65,13 @@ if "probability" not in st.session_state:
 if st.button("Predict Risk"):
 
     input_data = pd.DataFrame({
-        "AMT_INCOME_TOTAL": [amt_income],
-        "AMT_CREDIT": [amt_credit],
-        "AMT_ANNUITY": [amt_annuity],
-        "repayment_reliability": [repayment_reliability],
-        "credit_history_strength": [credit_history_strength]
-    })
+    "AMT_INCOME_TOTAL": [amt_income],
+    "AMT_CREDIT": [amt_credit],
+    "AMT_ANNUITY": [amt_annuity],
+    "EXT_SOURCE_2": [repayment_reliability],
+    "EXT_SOURCE_3": [credit_history_strength],
+    "CREDIT_TO_ANNUITY_RATIO": [credit_to_annuity_ratio]
+})
 
     probability = model.predict_proba(input_data)[0][1]
     st.session_state.probability = probability
@@ -138,5 +139,6 @@ if st.session_state.probability is not None:
     ax.legend()
 
     st.pyplot(fig)
+
 
 
