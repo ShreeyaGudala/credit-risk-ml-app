@@ -68,8 +68,8 @@ if st.button("Predict Risk"):
         "AMT_INCOME_TOTAL": [amt_income],
         "AMT_CREDIT": [amt_credit],
         "AMT_ANNUITY": [amt_annuity],
-        "EXT_SOURCE_2": [ext_source_2],
-        "EXT_SOURCE_3": [ext_source_3]
+        "repayment_reliability": [repayment_reliability],
+        "credit_history_strength": [credit_history_strength]
     })
 
     probability = model.predict_proba(input_data)[0][1]
@@ -138,4 +138,5 @@ if st.session_state.probability is not None:
     ax.legend()
 
     st.pyplot(fig)
+
 
