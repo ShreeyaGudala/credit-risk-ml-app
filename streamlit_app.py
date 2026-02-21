@@ -43,18 +43,33 @@ st.divider()
 # -------------------------------
 # PREDICTION
 # -------------------------------
-if st.button("Evaluate Credit Risk"):
+st.subheader("Financial Projection (12-Month Simulation)")
 
-    input_data = pd.DataFrame({
-        "AMT_INCOME_TOTAL": [amt_income],
-        "AMT_CREDIT": [amt_credit],
-        "AMT_ANNUITY": [amt_annuity],
-        "EXT_SOURCE_2": [ext_source_2],
-        "EXT_SOURCE_3": [ext_source_3]
-    })
+months = np.arange(1, 13)
+interest_rate = 0.12
+monthly_interest = (amt_credit * interest_rate) / 12
 
-    probability = model.predict_proba(input_data)[0][1]
+# Repaid scenario (cumulative growth)
+repaid_curve = months * monthly_interest
 
+# Default scenario (loss occurs immediately)
+default_curve = np.full(12, -amt_credit)
+
+# Expected value curve
+expected_curve = (1 - probability) * repaid_curve + probability * default_curve
+
+fig, ax = plt.subplots(figsize=(8, 5))
+
+ax.plot(months, repaid_curve, label="If Repaid", linewidth=3)
+ax.plot(months, default_curve, label="If Default", linewidth=3)
+ax.plot(months, expected_curve, linestyle="--", linewidth=3, label="Expected Outcome")
+
+ax.set_xlabel("Months")
+ax.set_ylabel("Amount (₹)")
+ax.set_title("Loan Cashflow Projection")
+ax.legend()
+
+st.pyplot(fig)
     # -------------------------------
     # RISK CLASSIFICATION
     # -------------------------------
@@ -108,4 +123,5 @@ ax.axvline(0, color="gray", linestyle="--", linewidth=1)  # zero reference line
 ax.legend()
 
 st.pyplot(fig)
+
 
