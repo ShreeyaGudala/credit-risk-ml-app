@@ -77,12 +77,12 @@ if st.button("Predict Risk"):
 
         st.subheader(f"Predicted Default Probability: {probability:.2%}")
 
-        if probability < 0.30:
-            st.success("Low Risk Applicant – Loan Approval Recommended")
-        elif probability < 0.60:
-            st.warning("Moderate Risk – Manual Credit Review Required")
+        if probability < 0.08:
+            st.success("Low Risk")
+        elif probability < 0.15:
+            st.warning("Moderate Risk")
         else:
-            st.error("High Risk – Loan Rejection Recommended")
+            st.error("High Risk")
 
         st.divider()
 
@@ -109,3 +109,4 @@ if st.button("Predict Risk"):
         ax.legend()
 
         st.pyplot(fig)
+
