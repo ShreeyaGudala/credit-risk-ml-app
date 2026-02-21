@@ -41,35 +41,37 @@ ext_source_3 = st.number_input("External Risk Score 2", min_value=0.0, max_value
 st.divider()
 
 # -------------------------------
-# PREDICTION
+# SESSION STATE INIT
 # -------------------------------
-st.subheader("Financial Projection (12-Month Simulation)")
+if "probability" not in st.session_state:
+    st.session_state.probability = None
 
-months = np.arange(1, 13)
-interest_rate = 0.12
-monthly_interest = (amt_credit * interest_rate) / 12
+# -------------------------------
+# PREDICTION BUTTON
+# -------------------------------
+if st.button("Predict Risk"):
 
-# Repaid scenario (cumulative growth)
-repaid_curve = months * monthly_interest
+    input_data = pd.DataFrame({
+        "AMT_INCOME_TOTAL": [amt_income],
+        "AMT_CREDIT": [amt_credit],
+        "AMT_ANNUITY": [amt_annuity],
+        "EXT_SOURCE_2": [ext_source_2],
+        "EXT_SOURCE_3": [ext_source_3]
+    })
 
-# Default scenario (loss occurs immediately)
-default_curve = np.full(12, -amt_credit)
+    probability = model.predict_proba(input_data)[0][1]
+    st.session_state.probability = probability
 
-# Expected value curve
-expected_curve = (1 - probability) * repaid_curve + probability * default_curve
+# -------------------------------
+# DISPLAY RESULTS (PERSISTENT)
+# -------------------------------
+if st.session_state.probability is not None:
 
-fig, ax = plt.subplots(figsize=(8, 5))
+    probability = st.session_state.probability
 
-ax.plot(months, repaid_curve, label="If Repaid", linewidth=3)
-ax.plot(months, default_curve, label="If Default", linewidth=3)
-ax.plot(months, expected_curve, linestyle="--", linewidth=3, label="Expected Outcome")
+    st.subheader("Risk Assessment Result")
+    st.write(f"Risk Probability: {probability:.2%}")
 
-ax.set_xlabel("Months")
-ax.set_ylabel("Amount (₹)")
-ax.set_title("Loan Cashflow Projection")
-ax.legend()
-
-st.pyplot(fig)
     # -------------------------------
     # RISK CLASSIFICATION
     # -------------------------------
@@ -91,37 +93,35 @@ st.pyplot(fig)
     st.divider()
 
     # -------------------------------
-    # FINANCIAL IMPACT SIMULATION
+    # FINANCIAL PROJECTION
     # -------------------------------
     st.subheader("Financial Projection (12-Month Simulation)")
 
-months = np.arange(1, 13)
-interest_rate = 0.12
-monthly_interest = (amt_credit * interest_rate) / 12
+    months = np.arange(1, 13)
+    interest_rate = 0.12
+    monthly_interest = (amt_credit * interest_rate) / 12
 
-# Repaid scenario
-repaid_curve = months * monthly_interest
+    # Repaid scenario
+    repaid_curve = months * monthly_interest
 
-# Default scenario (flat loss)
-default_curve = np.full(12, -amt_credit)
+    # Default scenario
+    default_curve = np.full(12, -amt_credit)
 
-# Expected scenario
-expected_curve = (1 - probability) * repaid_curve + probability * default_curve
+    # Expected outcome
+    expected_curve = (1 - probability) * repaid_curve + probability * default_curve
 
-fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(8, 6))
 
-ax.plot(repaid_curve, months, linewidth=3, label="If Repaid")
-ax.plot(default_curve, months, linewidth=3, label="If Default")
-ax.plot(expected_curve, months, linestyle="--", linewidth=3, label="Expected Outcome")
+    ax.plot(repaid_curve, months, linewidth=3, label="If Repaid")
+    ax.plot(default_curve, months, linewidth=3, label="If Default")
+    ax.plot(expected_curve, months, linestyle="--", linewidth=3, label="Expected Outcome")
 
-ax.set_ylabel("Months")
-ax.set_xlabel("Amount (₹)")
-ax.set_title("Loan Exposure Projection")
+    ax.set_ylabel("Months")
+    ax.set_xlabel("Amount (₹)")
+    ax.set_title("Loan Exposure Projection")
 
-ax.axvline(0, color="gray", linestyle="--", linewidth=1)  # zero reference line
+    ax.axvline(0, color="gray", linestyle="--", linewidth=1)
 
-ax.legend()
+    ax.legend()
 
-st.pyplot(fig)
-
-
+    st.pyplot(fig)
